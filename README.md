@@ -15,7 +15,7 @@ Post 2: [I discussed testing, prevention, and management here](https://www.linke
 
 ## Objectives:
 
-- Develop a machine learning model to predict diabetes risk with high accuracy 80% +.
+- Develop a machine learning model to predict diabetes risk with high accuracy, F1 score and Recall of 80% +.
 - Analyze data to identify significant predictors of diabetes.
 
 ---
@@ -25,12 +25,10 @@ Post 2: [I discussed testing, prevention, and management here](https://www.linke
 1. Data Loading
 2. Data Cleaning
 3. EDA and Feature Engineering
-4. Feature Selection
-5. Data Preprocessing
-6. Splitting Data
-7. Model Selection and Training
-8. Model Evaluation
-9. Conclusion and Reporting
+4. Data Preprocessing
+5. Model Selection and Training
+6. Model Evaluation
+7. Conclusion and Reporting
 
 ---
 
@@ -38,7 +36,7 @@ Post 2: [I discussed testing, prevention, and management here](https://www.linke
 
 ### Dataset Overview
 
-We used the Pima Indians Diabetes Dataset with 768 rows, and 9 columns, It also contains some clinical features related to diabetes.
+This dataset is originally from the National Institute of Diabetes and Digestive and Kidney Diseases. This dataset contains 768 rows, and 9 columns. Several constraints were placed on the selection of these instances from a larger database. In particular, all patients here are females at least 21 years old of Pima Indian heritage. [Diabetes dataset](https://www.kaggle.com/datasets/uciml/pima-indians-diabetes-database)
 
 > Features:
 
@@ -59,20 +57,17 @@ We used the Pima Indians Diabetes Dataset with 768 rows, and 9 columns, It also 
 
 ## Data Cleaning:
 
-At Initial glance, it seems like there were no missing values. But a second look with an industry eye at the descriptive summary uncovered the inappropriateness of the data, As its odd to have zero(0) as the min for the features values.
+At first glance, it seemed there were no missing values. However, a closer examination with an industry perspective of the descriptive summary revealed inconsistencies in the data, as it is unusual for the minimum value of some of the features to be zero (0).
+
 ![](./img/missing%20values.png)
 
 ### Handling Missing Values:
 
-Replaced zero values in features like insulin and BMI with NaN value to reveal missing values.
+Replaced zero values in features like Glucose, BMI, Insulin, BloodPressure, SkinThickness, with NaN value to reveal missing values. The missing values were imputed by replacing zero values based on the median of each column, grouped by the 'Outcome' column.
 
 |      Replacing zero values       |         Visualization         |
 | :------------------------------: | :---------------------------: |
 | ![](./img/replace%20missing.png) | ![](./img/output_missing.png) |
-
-#### FIx by replacing zero values with the median
-
-![](./img/imputer.png)
 
 ---
 
@@ -81,10 +76,12 @@ Replaced zero values in features like insulin and BMI with NaN value to reveal m
 EDA provided critical insights into the dataset:
 Key Findings after the features were cut into bins
 
-- **Insulin Levels**: Strongly correlated with diabetes. Individuals with glucose levels above 140 mg/dL showed a higher probability of diabetes.
+- **Insulin Levels**: Strongly correlated with diabetes. Individuals with abnormal levels above 166 showed a higher probability of diabetes.
   ![](./img/Insulin.png)
-- **Glucose Levels**: Strongly correlated with diabetes. Individuals with glucose levels above 140 mg/dL showed a higher probability of diabetes.
+
+- **Glucose Levels**: Strongly correlated with diabetes. Individuals with glucose levels above 100 mg/dL showed a higher probability of diabetes.
   ![](./img/glucose.png)
+
 - **BMI**: Higher BMI values significantly increased diabetes risk, emphasizing the role of weight management.
   ![](./img/BMI.png)
 - **Age**: Older individuals, had a higher prevalence of diabetes.
@@ -108,11 +105,25 @@ Combined Glucose, BMI, BloodPressure, Insulin and Pregnancy levels to create a r
 ![](./img/pairplot.png)
 **Scatter Plots**: Revealed feature interactions and data distributions.
 ![](./img/scatterplot.png)
-**Box Plots**: Identified outliers in critical features like glucose and insulin levels.
+**Box Plots**: Identified outliers in critical features like glucose and insulin levels which was clipped.
 ![](./img/Outlier.png)
 ![](./img/no%20outlier.png)
 
 ---
+
+## Data Preprocessing:
+
+### One hot encoding
+
+The categorical features such as 'bmi_class', 'insulin_class', 'glucose_class' were one hot encoded.
+
+### Data Scaling
+
+The data dataframe was separated into a numerical and categorical dataframe to allow the numerical data to be scaled only, as its not ideal for the categorical to be scaled after being one hot encoded.
+
+### Scaling and Splitting
+
+Robust scaler was used to scale the numerical data, after which both numerical and categorical data was concatenated and split into X and Training and testing in the ratio of 80:20.
 
 ## Model Development:
 
@@ -131,10 +142,10 @@ Algorithms Used
 
 ## Model Evaluation Metrics:
 
-- F1-Score
-- Recall
-- Accuracy
-- Precision
+- **F1-Score**: Balances precision and recall.
+- **Recall**: Measures the ability to identify actual diabetic patients (True Positives).
+- **Accuracy**: Overall correctness of predictions.
+- **Precision**: Proportion of positive identifications that were correct.
 
 ![](./img/model%20performance.png)
 
@@ -144,37 +155,84 @@ The Gradient Boosting Classifier model achieved the highest metrics making it th
 
 ## Interpretability and Insights
 
-Glucose levels had the highest impact on predictions, followed by BMI and age.
-Genetic predisposition (diabetes pedigree function) played a significant role in certain cases.
-Feature interactions revealed nuanced risk profiles, aiding personalized interventions.
+### Key Metrics used to rank result
+
+- **Recall** (Sensitivity/True Positive Rate):
+  Recall measures the proportion of actual diabetics (positives) correctly identified by the model.
+  High recall ensures that fewer diabetics are misclassified as non-diabetic (false negatives are minimized).
+
+- **F1-Score** ()How many predicted diabetics are actually diabetic)
+  F1-Score balances precision and recall. This is particularly useful in imbalanced datasets where both false positives and false negatives matter.
+
+### Feature Importance
+
+Insulin and Glucose levels had the highest impact on predictions, followed by Age and BMI.
+
+Insulin - 0.683831
+Glucose - 0.119013
+Age - 0.056160
+BMI - 0.041287
 
 ---
 
 ## Implications and Applications
 
-Healthcare Screening: The model can assist healthcare professionals in identifying at-risk individuals for early intervention.
-Public Health Insights: Data-driven insights can guide awareness campaigns, focusing on lifestyle modifications and regular check-ups.
-Policy Recommendations: Emphasizing preventive measures in populations with higher genetic or lifestyle risks.
+- **Healthcare Screening**: The model can assist healthcare professionals in identifying at-risk individuals for early intervention.
+- **Public Health Insights**: Data-driven insights can guide awareness campaigns, focusing on lifestyle modifications and regular check-ups.
+- **Policy Recommendations**.
 
 ---
 
 ## Challenges and Limitations
 
-Data Imbalance: The dataset had more non-diabetic cases, requiring balancing techniques like SMOTE (Synthetic Minority Over-sampling Technique).
-Limited Features: The dataset lacked information on dietary habits, physical activity, and other socio-economic factors.
-Generalizability: Results are specific to the dataset used and require validation on larger, diverse populations.
+- **Data Imbalance**: The dataset had more non-diabetic cases.
+- **Limited Features**: The dataset lacked information on dietary habits, physical activity, etc.
+- **Generalizability**: Results are specific to the dataset used, as all patients here are females of Pima Indian heritage
+  and require validation on larger, diverse populations.
 
 ---
 
 ## Future Directions
 
-Expanding Features: Incorporate additional factors such as lifestyle habits, genetic markers, and real-time glucose monitoring data.
-Integration with Wearables: Link machine learning models with wearable devices for continuous monitoring and prediction.
-Deployment: Develop a user-friendly app or API for clinicians and individuals to leverage the model's predictions.
+- **Expanding Features**: Incorporate additional factors such as lifestyle habits, and genetic markers.
+- **Hyperparameter Tuning**
+- **Deployment**: Develop a user-friendly app or API for clinicians and individuals to leverage the model's predictions.
 
 ---
 
 ## Conclusion
 
 This project demonstrated the potential of machine learning in addressing diabetes, a critical global health issue. By combining advanced algorithms with detailed data analysis, we can pave the way for smarter, more effective healthcare solutions.
-What's Next? Let's collaborate to take this further - integrating real-world applications and advancing healthcare innovation.
+
+## What's Next?
+
+Thank you for taking the time to explore this project!. Please star the repo.
+I welcome feedback and suggestions to enhance the project. If you spot any areas that need improvement, raise an issue in the repository.
+
+### Suggestions and Improvements
+
+Found a bug? Raise an issue.
+Have an idea for a new feature? Share your thoughts!
+Want to improve the documentation or code? Contributions are always welcome.
+
+If you'd like to contribute to this project, feel free to fork the repository, make changes, and submit a pull request. I’m excited to learn from your expertise and incorporate new perspectives into the work.
+
+> To contribute:
+
+- Fork this repository.
+- Create a feature branch (git checkout -b feature-name).
+- Commit your changes (git commit -m "Add your message here").
+- Push to your branch (git push origin feature-name).
+- Open a pull request with a description of your changes.
+
+#### Collaboration Opportunities
+
+I’m open to collaborating with individuals or teams working on similar or entirely different projects. If you are working on an exciting project and think we could achieve more together, please reach out! I’m always looking forward to learning, sharing ideas, and building impactful solutions as a team.
+
+##### You can reach me via:
+
+Email: cemmanuelonyema@gmail.com
+LinkedIn: [My LinkedIn Profile](https://www.linkedin.com/in/onyemacemmanuel/)
+Twitter: [My Twitter Handle](https://twitter.com/ceonyema_)
+Medium: [Read my Data Articles here](https://medium.com/@ceonyema)
+Let’s connect and discuss ideas, and make a difference!
